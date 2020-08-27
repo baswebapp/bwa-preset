@@ -1,0 +1,13 @@
+{
+    "useConfigFiles": false,
+    "plugins": {
+        "@vue/cli-plugin-babel": {
+            "version": "3.5.1",
+            "presets": [
+                ["@vue/app", {
+                    "useBuiltIns": "entry"
+                }]
+            ]
+        }
+    }
+}
