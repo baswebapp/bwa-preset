@@ -73,47 +73,50 @@ module.exports = (api, options, rootOptions) => {
 
   api.render(async function (files) {
 
-    Object.keys(files).forEach(name => {
-      delete files[name]
-    });
+    Object.keys(files).forEach(name => { delete files[name] });
 
-    const template = options.repo || options.template
+    const _template = options.repo || options.template
+    const _base = 'src';
 
-    const base = 'src';
-
+    //获取公共模版内容
     await generate(path.resolve(__dirname, './template/common'), files);
 
-    if (template === 'bwa/bwa-template-h5') {
-      await generate(path.resolve(__dirname, './template/h5'), files, base, rootOptions)
+    //根据项目类型拷贝类容
+    if (_template === 'bwa/bwa-template-h5') {
+      await generate(path.resolve(__dirname, './template/h5'), files, "", rootOptions);
+    } 
+    else if (_template === 'bwa/bwa-template-news') {
+      
     } 
     else {
-      const ora = require('ora')
-      const home = require('user-home')
-      const download = require('download-git-repo')
-      const spinner = ora('模板下载中...')
-      spinner.start();
+      //todo:开发中
+      // const ora = require('ora')
+      // const home = require('user-home')
+      // const download = require('download-git-repo')
+      // const spinner = ora('模板下载中...')
+      // spinner.start();
 
-      const tmp = path.join(home, '.uni-app/templates', template.replace(/[/:]/g, '-'), 'src')
+      // const tmp = path.join(home, '.bwa-app/templates', template.replace(/[/:]/g, '-'), 'src')
 
-      if (fs.existsSync(tmp)) {
-        try {
-          require('rimraf').sync(tmp)
-        } catch (e) {
-          console.error(e)
-        }
-      }
+      // if (fs.existsSync(tmp)) {
+      //   try {
+      //     require('rimraf').sync(tmp)
+      //   } catch (e) {
+      //     console.error(e)
+      //   }
+      // }
 
-      await new Promise((resolve, reject) => {
-        download(template, tmp, err => {
-          spinner.stop()
-          if (err) {
-            return reject(err)
-          }
-          resolve()
-        })
-      })
+      // await new Promise((resolve, reject) => {
+      //   download(template, tmp, err => {
+      //     spinner.stop()
+      //     if (err) {
+      //       return reject(err)
+      //     }
+      //     resolve()
+      //   })
+      // })
 
-      await generate(tmp, files, base)
+      // await generate(tmp, files, _base)
     }
   })
 }
