@@ -40,6 +40,8 @@ async function generate (dir, files, base = '', rootOptions = {}) {
 }
 
 module.exports = (api, options, rootOptions) => {
+
+  //扩展package配置
   api.extendPackage(pkg => {
     return {
       dependencies: {
@@ -50,40 +52,46 @@ module.exports = (api, options, rootOptions) => {
         "vuex": "^3.4.0"
       },
       devDependencies: {
-        'postcss-comment': '^2.0.0'
+        "@vue/cli-plugin-babel": "^4.5.0",
+        "@vue/cli-service": "^4.5.0",
+        "less": "^3.0.4",
+        "less-loader": "^5.0.0",
+        "vue-template-compiler": "^2.6.11"
       }
     }
-  })
+  });
  
- if (options.template === 'dcloudio/uni-template-news') {
-    api.extendPackage(pkg => {
-      return {
-        devDependencies: {
-          'node-sass': '^4.11.0',
-          'sass-loader': '^7.1.0'
-        }
-      }
-    })
-  }
+//  if (options.template === 'bwa/bwa-template-news') {
+//     api.extendPackage(pkg => {
+//       return {
+//         devDependencies: {
+          
+//         }
+//       }
+//     })
+//   }
 
   api.render(async function (files) {
+
     Object.keys(files).forEach(name => {
       delete files[name]
-    })
+    });
 
     const template = options.repo || options.template
 
-    const base = 'src'
-    await generate(path.resolve(__dirname, './template/common'), files)
-    if (template === 'default') {
-      await generate(path.resolve(__dirname, './template/default'), files, base, rootOptions)
-    } else {
+    const base = 'src';
+
+    await generate(path.resolve(__dirname, './template/common'), files);
+
+    if (template === 'bwa/bwa-template-h5') {
+      await generate(path.resolve(__dirname, './template/h5'), files, base, rootOptions)
+    } 
+    else {
       const ora = require('ora')
       const home = require('user-home')
       const download = require('download-git-repo')
-
       const spinner = ora('模板下载中...')
-      spinner.start()
+      spinner.start();
 
       const tmp = path.join(home, '.uni-app/templates', template.replace(/[/:]/g, '-'), 'src')
 
