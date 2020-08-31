@@ -44,11 +44,11 @@ module.exports = (api, options, rootOptions) => {
   //扩展package配置
   api.extendPackage(pkg => {
     return {
-      dependencies: {
+      dependencies: { 
         "axios": "^0.19.2",
+        "core-js": "^3.6.5",
         "vue": "^2.6.11",
-        "vue-i18n": "^8.18.2",
-        "vue-router": "^3.3.4",
+        "vue-router": "^3.2.0",
         "vuex": "^3.4.0"
       },
       devDependencies: {
@@ -61,15 +61,18 @@ module.exports = (api, options, rootOptions) => {
     }
   });
  
-//  if (options.template === 'bwa/bwa-template-news') {
-//     api.extendPackage(pkg => {
-//       return {
-//         devDependencies: {
+ if (options.template === 'bwa/bwa-template-news') {
+    api.extendPackage(pkg => {
+      return {
+        dependencies:{
+          "vue-i18n": "^8.18.2"
+        },
+        devDependencies: {
           
-//         }
-//       }
-//     })
-//   }
+        }
+      }
+    })
+  }
 
   api.render(async function (files) {
 
