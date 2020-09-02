@@ -60,8 +60,20 @@ module.exports = (api, options, rootOptions) => {
       }
     }
   });
- 
- if (options.template === 'bwa/bwa-template-news') {
+
+  if (options.template === 'bwa/bwa-template-h5') {
+    api.extendPackage(pkg => {
+      return {
+        dependencies:{
+          "vant": "^2.10.3"
+        },
+        devDependencies: {
+          
+        }
+      }
+    })
+  }
+  else if (options.template === 'bwa/bwa-template-news') {
     api.extendPackage(pkg => {
       return {
         dependencies:{
