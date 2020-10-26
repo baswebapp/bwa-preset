@@ -9,7 +9,6 @@
 	"author": "fxy060608",
 	"license": "Apache-2.0",
 	"dependencies": {
-		"download-git-repo": "^1.1.0",
 		"glob": "^7.1.3",
 		"isbinaryfile": "^3.0.3",
 		"ora": "^3.0.0",
