@@ -100,19 +100,14 @@ module.exports = (api, options, rootOptions) => {
 		await generate(path.resolve(__dirname, './template/common'), files);
 	
 		let _spinner = ora('模板下载中...')
-		
+		let _tmpDir = path.join(home, '.bwa-app/templates', _template.replace(/[/:]/g, '-'), 'src')
+
 		_spinner.start();
-
-		const tmp = path.join(home, '.bwa-app/templates', _template.replace(/[/:]/g, '-'), 'src')
-
-		console.log(tmp)
-		console.log("\r\n")
-		console.log(_template) 
 
 		await new Promise((resolve, reject) => {
 			//http://gitlab.baswebapp.cn/bwa/bwa-template-h5.git
 			//开始下载 /bwa/bwa-template-h5/repository/archive.zip?ref=master
-			download(_template, tmp, err => {
+			download(_template, _tmpDir, err => {
 
 				//下载完成
 				_spinner.stop()
@@ -123,6 +118,6 @@ module.exports = (api, options, rootOptions) => {
 			})
 		})
 
-		await generate(tmp, files, _base)
+		await generate(_tmpDir, files, _base)
 	})
 }
