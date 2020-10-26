@@ -17,35 +17,46 @@ module.exports = download
  * @param {Function} fn
  */
 
-function download (repo, dest, opts, fn) {
-  if (typeof opts === 'function') {
-    fn = opts
-    opts = null
-  }
-  opts = opts || {}
-  var clone = opts.clone || false
+function download(repo, dest, opts, fn) {
+	if (typeof opts === 'function') {
+		fn = opts
+		opts = null
+	}
+	opts = opts || {}
+	var clone = opts.clone || false
 
-  repo = normalize(repo)
-  var url = repo.url || getUrl(repo, clone)
+	repo = normalize(repo)
 
-  if (clone) {
-    gitclone(url, dest, { checkout: repo.checkout, shallow: repo.checkout === 'master' }, function (err) {
-      if (err === undefined) {
-        rm(dest + '/.git')
-        fn()
-      } else {
-        fn(err)
-      }
-    })
-  } else {
-    downloadUrl(url, dest, { extract: true, strip: 1, mode: '666', headers: { accept: 'application/zip' } })
-      .then(function (data) {
-        fn()
-      })
-      .catch(function (err) {
-        fn(err)
-      })
-  }
+	var url = repo.url || getUrl(repo, clone)
+
+	if (clone) {
+		gitclone(url, dest, {
+			checkout: repo.checkout,
+			shallow: repo.checkout === 'master'
+		}, function (err) {
+			if (err === undefined) {
+				rm(dest + '/.git')
+				fn()
+			} else {
+				fn(err)
+			}
+		})
+	} else {
+		downloadUrl(url, dest, {
+				extract: true,
+				strip: 1,
+				mode: '666',
+				headers: {
+					accept: 'application/zip'
+				}
+			})
+			.then(function (data) {
+				fn()
+			})
+			.catch(function (err) {
+				fn(err)
+			})
+	}
 }
 
 /**
@@ -55,45 +66,47 @@ function download (repo, dest, opts, fn) {
  * @return {Object}
  */
 
-function normalize (repo) {
-  var regex = /^(?:(direct):([^#]+)(?:#(.+))?)$/
-  var match = regex.exec(repo)
+function normalize(repo) {
+	var regex = /^(?:(direct):([^#]+)(?:#(.+))?)$/
+	var match = regex.exec(repo)
 
-  if (match) {
-    var url = match[2]
-    var checkout = match[3] || 'master'
+	if (match) {
+		var url = match[2]
+		var checkout = match[3] || 'master'
+	
+		return {
+			type: 'direct',
+			url: url,
+			checkout: checkout
+		}
+	} else {
+		regex = /^(?:(github|gitlab|bitbucket):)?(?:(.+):)?([^\/]+)\/([^#]+)(?:#(.+))?$/
+		match = regex.exec(repo)
+		var type = match[1] || 'baswebapp'
+		var origin = match[2] || null
+		var owner = match[3]
+		var name = match[4]
+		var checkout = match[5] || 'master'
 
-    return {
-      type: 'direct',
-      url: url,
-      checkout: checkout
-    }
-  } else {
-    regex = /^(?:(github|gitlab|bitbucket):)?(?:(.+):)?([^\/]+)\/([^#]+)(?:#(.+))?$/
-    match = regex.exec(repo)
-    var type = match[1] || 'github'
-    var origin = match[2] || null
-    var owner = match[3]
-    var name = match[4]
-    var checkout = match[5] || 'master'
-
-    if (origin == null) {
-      if (type === 'github')
-        origin = 'github.com'
-      else if (type === 'gitlab')
-        origin = 'gitlab.com'
-      else if (type === 'bitbucket')
-        origin = 'bitbucket.com'
-    }
-
-    return {
-      type: type,
-      origin: origin,
-      owner: owner,
-      name: name,
-      checkout: checkout
-    }
-  }
+		if (origin == null) {
+			if (type === 'github')
+				origin = 'github.com'
+			else if (type === 'gitlab')
+				origin = 'gitlab.com'
+			else if (type === 'bitbucket')
+				origin = 'bitbucket.com'
+			else if (type === 'baswebapp')
+				origin = 'gitlab.baswebapp.cn'
+		}
+	
+		return {
+			type: type,
+			origin: origin,
+			owner: owner,
+			name: name,
+			checkout: checkout
+		}
+	}
 }
 
 /**
@@ -103,15 +116,15 @@ function normalize (repo) {
  * @return {String}
  */
 
-function addProtocol (origin, clone) {
-  if (!/^(f|ht)tps?:\/\//i.test(origin)) {
-    if (clone)
-      origin = 'git@' + origin
-    else
-      origin = 'https://' + origin
-  }
+function addProtocol(origin, clone) {
+	if (!/^(f|ht)tps?:\/\//i.test(origin)) {
+		if (clone)
+			origin = 'git@' + origin
+		else
+			origin = 'https://' + origin
+	}
 
-  return origin
+	return origin
 }
 
 /**
@@ -121,27 +134,29 @@ function addProtocol (origin, clone) {
  * @return {String}
  */
 
-function getUrl (repo, clone) {
-  var url
+function getUrl(repo, clone) {
+	var url
 
-  // Get origin with protocol and add trailing slash or colon (for ssh)
-  var origin = addProtocol(repo.origin, clone)
-  if (/^git\@/i.test(origin))
-    origin = origin + ':'
-  else
-    origin = origin + '/'
+	// Get origin with protocol and add trailing slash or colon (for ssh)
+	var origin = addProtocol(repo.origin, clone)
+	if (/^git\@/i.test(origin))
+		origin = origin + ':'
+	else
+		origin = origin + '/'
 
-  // Build url
-  if (clone) {
-    url = origin + repo.owner + '/' + repo.name + '.git'
-  } else {
-    if (repo.type === 'github')
-      url = origin + repo.owner + '/' + repo.name + '/archive/' + repo.checkout + '.zip'
-    else if (repo.type === 'gitlab')
-      url = origin + repo.owner + '/' + repo.name + '/repository/archive.zip?ref=' + repo.checkout
-    else if (repo.type === 'bitbucket')
-      url = origin + repo.owner + '/' + repo.name + '/get/' + repo.checkout + '.zip'
-  }
+	// Build url
+	if (clone) {
+		url = origin + repo.owner + '/' + repo.name + '.git'
+	} else {
+		if (repo.type === 'github')
+			url = origin + repo.owner + '/' + repo.name + '/archive/' + repo.checkout + '.zip'
+		else if (repo.type === 'gitlab')
+			url = origin + repo.owner + '/' + repo.name + '/repository/archive.zip?ref=' + repo.checkout
+		else if (repo.type === 'baswebapp')
+			url = 'http://gitlab.baswebapp.cn/bwa//' + repo.name + '/repository/archive.zip?ref=' + repo.checkout
+		else if (repo.type === 'bitbucket')
+			url = origin + repo.owner + '/' + repo.name + '/get/' + repo.checkout + '.zip'
+	}
 
-  return url
+	return url
 }

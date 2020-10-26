@@ -11,8 +11,8 @@ module.exports = [{
         value: 'bwa/bwa-template-news'
       },
       {
-        name: '管理',
-        value: 'custom'
+        name: '管理系统模版',
+        value: 'bwa/bwa-template-mis'
       },
       {
         name: '自定义模板',

@@ -1,7 +1,9 @@
 const fs = require('fs')
 const path = require('path')
-
 const isBinary = require('isbinaryfile')
+const ora = require('ora')
+const home = require('user-home')
+const download = require('./download')
 
 /**
  * 生成
@@ -40,7 +42,7 @@ async function generate(dir, files, base = '', rootOptions = {}) {
 }
 
 module.exports = (api, options, rootOptions) => {
-
+	
 	//扩展package配置
 	api.extendPackage(pkg => {
 		return {
@@ -89,50 +91,38 @@ module.exports = (api, options, rootOptions) => {
 
 	api.render(async function (files) {
 
-		Object.keys(files).forEach(name => {
-			delete files[name]
-		});
+		Object.keys(files).forEach(name => { delete files[name] });
 
 		let _template = options.repo || options.template
 		let _base = 'src';
 
 		//获取公共模版内容
 		await generate(path.resolve(__dirname, './template/common'), files);
+	
+		let _spinner = ora('模板下载中...')
+		
+		_spinner.start();
 
-		//根据项目类型拷贝类容
-		if (_template === 'bwa/bwa-template-h5') {
-			await generate(path.resolve(__dirname, './template/h5'), files, "", rootOptions);
-		} else if (_template === 'bwa/bwa-template-news') {
+		const tmp = path.join(home, '.bwa-app/templates', _template.replace(/[/:]/g, '-'), 'src')
 
-		} else {
-			// todo:开发中
-			// const ora = require('ora')
-			// const home = require('user-home')
-			// const download = require('download-git-repo')
-			// const spinner = ora('模板下载中...')
-			// spinner.start();
+		console.log(tmp)
+		console.log("\r\n")
+		console.log(_template) 
 
-			// const tmp = path.join(home, '.bwa-app/templates', template.replace(/[/:]/g, '-'), 'src')
+		await new Promise((resolve, reject) => {
+			//http://gitlab.baswebapp.cn/bwa/bwa-template-h5.git
+			//开始下载 /bwa/bwa-template-h5/repository/archive.zip?ref=master
+			download(_template, tmp, err => {
 
-			// if (fs.existsSync(tmp)) {
-			//   try {
-			//     require('rimraf').sync(tmp)
-			//   } catch (e) {
-			//     console.error(e)
-			//   }
-			// }
+				//下载完成
+				_spinner.stop()
 
-			// await new Promise((resolve, reject) => {
-			//   download(template, tmp, err => {
-			//     spinner.stop()
-			//     if (err) {
-			//       return reject(err)
-			//     }
-			//     resolve()
-			//   })
-			// })
+				if (err) { return reject(err) }
 
-			// await generate(tmp, files, _base)
-		}
+				resolve()
+			})
+		})
+
+		await generate(tmp, files, _base)
 	})
 }
