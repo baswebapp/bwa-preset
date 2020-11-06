@@ -20,21 +20,34 @@ async function generate(dir, files, base = '', rootOptions = {}) {
 		cwd: dir,
 		nodir: true
 	}).forEach(rawPath => {
-		const sourcePath = path.resolve(dir, rawPath)
+
+        const sourcePath = path.resolve(dir, rawPath)
+        
 		const filename = path.join(base, rawPath)
 
+        //是否是二进制文件
 		if (isBinary.sync(sourcePath)) {
+            //如果是直接返回流
 			files[filename] = fs.readFileSync(sourcePath) // return buffer
-		} else {
-			let content = fs.readFileSync(sourcePath, 'utf-8')
+        } 
+        else {
+            //读取文件内容
+            let content = fs.readFileSync(sourcePath, 'utf-8')
+            
 			if (path.basename(filename) === 'manifest.json') {
 				content = content.replace('{{name}}', rootOptions.projectName || '')
-			}
+            }
+            
+            //_aaa.js => aaa.js
 			if (filename.charAt(0) === '_' && filename.charAt(1) !== '_') {
 				files[`.${filename.slice(1)}`] = content
-			} else if (filename.charAt(0) === '_' && filename.charAt(1) === '_') {
+            } 
+            //__aaa.js => _aaa.js
+            else if (filename.charAt(0) === '_' && filename.charAt(1) === '_') {
 				files[`${filename.slice(1)}`] = content
-			} else {
+            } 
+            //原模原样拷贝
+            else {
 				files[filename] = content
 			}
 		}
