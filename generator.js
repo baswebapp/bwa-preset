@@ -99,8 +99,10 @@ module.exports = (api, options, rootOptions) => {
 		//获取公共模版内容
 		await generate(path.resolve(__dirname, './template/common'), files);
 	
-		let _spinner = ora('模板下载中...')
-		let _tmpDir = path.join(home, '.bwa-app/templates', _template.replace(/[/:]/g, '-'), 'src')
+        let _spinner = ora('模板下载中...')
+        
+        //下载到根目录
+		let _tmpDir = path.join(home, '.bwa-app/templates', _template.replace(/[/:]/g, '-'))
 
 		_spinner.start();
 
